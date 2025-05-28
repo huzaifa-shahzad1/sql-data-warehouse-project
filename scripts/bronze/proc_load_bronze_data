@@ -1,0 +1,203 @@
+/*
+===============================================================================
+Stored Procedure: Load Bronze Layer (Source -> Bronze)
+===============================================================================
+Script Purpose:
+    This stored procedure loads data into the 'bronze' schema from external CSV files. 
+    It performs the following actions:
+    - Truncates the bronze tables before loading data.
+    - Uses the 'COPY' command to load data from csv Files to bronze tables.
+
+Parameters:
+    None. 
+	  This stored procedure does not accept any parameters or return any values.
+
+Usage Example:
+    CALL bronze.load_bronze_data();
+===============================================================================
+*/
+
+CREATE OR REPLACE PROCEDURE bronze.load_bronze_data()
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    -- Variables to store timestamps for each table's loading
+    start_time TIMESTAMP;
+    end_time TIMESTAMP;
+    duration INTERVAL;
+    batch_start_time TIMESTAMP;
+    batch_end_time TIMESTAMP;
+    batch_duration INTERVAL; -- Renamed for clarity, though 'duration' could be reused
+BEGIN
+    SET datestyle TO 'DMY'; -- Set the date style for the current session
+
+    RAISE NOTICE '=============================================';
+    RAISE NOTICE 'Loading Bronze Layer';
+    RAISE NOTICE '=============================================';
+
+    RAISE NOTICE '---------------------------------------------';
+    RAISE NOTICE 'Loading CRM Tables';
+    RAISE NOTICE '---------------------------------------------';
+
+    batch_start_time := clock_timestamp();  -- START CALCULATING THE LOADING TIME OF WHOLE LAYER
+
+    -- --- Load crm_cust_info ---
+    BEGIN
+        start_time := clock_timestamp(); -- Record start time for this table
+        RAISE NOTICE 'Attempting to load bronze.crm_cust_info...';
+		RAISE NOTICE '>> Truncating the Table: bronze.crm_cust_info';
+        TRUNCATE TABLE bronze.crm_cust_info;
+        COPY bronze.crm_cust_info
+        FROM 'D:/Data Analysis/Data Warehouse Project/datasets/source_crm/cust_info.csv'
+        WITH (
+            FORMAT CSV,
+            HEADER true,
+            DELIMITER ','
+        );
+        end_time := clock_timestamp(); -- Record end time for this table
+        duration := end_time - start_time; -- Calculate duration
+        RAISE NOTICE 'Successfully loaded bronze.crm_cust_info.';
+        RAISE NOTICE '>> Duration to Load bronze.crm_cust_info Table: %', duration;
+    EXCEPTION
+        WHEN data_exception THEN
+            RAISE WARNING 'Data error loading bronze.crm_cust_info: SQLSTATE % - %', SQLSTATE, SQLERRM;
+        WHEN OTHERS THEN
+            RAISE WARNING 'An unexpected error occurred loading bronze.crm_cust_info: SQLSTATE % - %', SQLSTATE, SQLERRM;
+    END;
+
+    -- --- Load crm_prd_info ---
+    BEGIN
+        start_time := clock_timestamp(); -- Record start time for this table
+        RAISE NOTICE 'Attempting to load bronze.crm_prd_info...';
+		RAISE NOTICE '>> Truncating the Table: bronze.crm_prd_info';
+        TRUNCATE TABLE bronze.crm_prd_info;
+        COPY bronze.crm_prd_info
+        FROM 'D:/Data Analysis/Data Warehouse Project/datasets/source_crm/prd_info.csv'
+        WITH (
+            FORMAT CSV,
+            HEADER true,
+            DELIMITER ','
+        );
+        end_time := clock_timestamp(); -- Record end time for this table
+        duration := end_time - start_time; -- Calculate duration
+        RAISE NOTICE 'Successfully loaded bronze.crm_prd_info.';
+        RAISE NOTICE '>> Duration to Load bronze.crm_prd_info Table: %', duration;
+    EXCEPTION
+        WHEN data_exception THEN
+            RAISE WARNING 'Data error loading bronze.crm_prd_info: SQLSTATE % - %', SQLSTATE, SQLERRM;
+        WHEN OTHERS THEN
+            RAISE WARNING 'An unexpected error occurred loading bronze.crm_prd_info: SQLSTATE % - %', SQLSTATE, SQLERRM;
+    END;
+
+    -- --- Load crm_sales_details ---
+    BEGIN
+        start_time := clock_timestamp(); -- Record start time for this table
+        RAISE NOTICE 'Attempting to load bronze.crm_sales_details...';
+		RAISE NOTICE '>> Truncating the Table: bronze.crm_sales_details';
+        TRUNCATE TABLE bronze.crm_sales_details;
+        COPY bronze.crm_sales_details
+        FROM 'D:/Data Analysis/Data Warehouse Project/datasets/source_crm/sales_details.csv'
+        WITH (
+            FORMAT CSV,
+            HEADER true,
+            DELIMITER ',',
+			NULL AS '0'
+        );
+        end_time := clock_timestamp(); -- Record end time for this table
+        duration := end_time - start_time; -- Calculate duration
+        RAISE NOTICE 'Successfully loaded bronze.crm_sales_details.';
+        RAISE NOTICE '>> Duration to Load bronze.crm_sales_details Table: %', duration;
+    EXCEPTION
+        WHEN data_exception THEN
+            RAISE WARNING 'Data error loading bronze.crm_sales_details: SQLSTATE % - %', SQLSTATE, SQLERRM;
+        WHEN OTHERS THEN
+            RAISE WARNING 'An unexpected error occurred loading bronze.crm_sales_details: SQLSTATE % - %', SQLSTATE, SQLERRM;
+    END;
+
+    RAISE NOTICE '---------------------------------------------';
+    RAISE NOTICE 'Loading ERP Tables';
+    RAISE NOTICE '---------------------------------------------';
+
+    -- --- Load erp_cust_az12 ---
+    BEGIN
+        start_time := clock_timestamp(); -- Record start time for this table
+        RAISE NOTICE 'Attempting to load bronze.erp_cust_az12...';
+		RAISE NOTICE '>> Truncating the Table: bronze.erp_cust_az12';
+        TRUNCATE TABLE bronze.erp_cust_az12;
+        COPY bronze.erp_cust_az12
+        FROM 'D:/Data Analysis/Data Warehouse Project/datasets/source_erp/CUST_AZ12.csv'
+        WITH (
+            FORMAT CSV,
+            HEADER true,
+            DELIMITER ','
+        );
+        end_time := clock_timestamp(); -- Record end time for this table
+        duration := end_time - start_time; -- Calculate duration
+        RAISE NOTICE 'Successfully loaded bronze.erp_cust_az12.';
+        RAISE NOTICE '>> Duration to Load bronze.erp_cust_az12 Table: %', duration;
+    EXCEPTION
+        WHEN data_exception THEN
+            RAISE WARNING 'Data error loading bronze.erp_cust_az12: SQLSTATE % - %', SQLSTATE, SQLERRM;
+        WHEN OTHERS THEN
+            RAISE WARNING 'An unexpected error occurred loading bronze.erp_cust_az12: SQLSTATE % - %', SQLSTATE, SQLERRM;
+    END;
+
+    -- --- Load erp_loc_a101 ---
+    BEGIN
+        start_time := clock_timestamp(); -- Record start time for this table
+        RAISE NOTICE 'Attempting to load bronze.erp_loc_a101...';
+		RAISE NOTICE '>> Truncating the Table: bronze.erp_loc_a101';
+        TRUNCATE TABLE bronze.erp_loc_a101;
+        COPY bronze.erp_loc_a101
+        FROM 'D:/Data Analysis/Data Warehouse Project/datasets/source_erp/LOC_A101.csv'
+        WITH (
+            FORMAT CSV,
+            HEADER true,
+            DELIMITER ','
+        );
+        end_time := clock_timestamp(); -- Record end time for this table
+        duration := end_time - start_time; -- Calculate duration
+        RAISE NOTICE 'Successfully loaded bronze.erp_loc_a101.';
+        RAISE NOTICE '>> Duration to Load bronze.erp_loc_a101 Table: %', duration;
+    EXCEPTION
+        WHEN data_exception THEN
+            RAISE WARNING 'Data error loading bronze.erp_loc_a101: SQLSTATE % - %', SQLSTATE, SQLERRM;
+        WHEN OTHERS THEN
+            RAISE WARNING 'An unexpected error occurred loading bronze.erp_loc_a101: SQLSTATE % - %', SQLSTATE, SQLERRM;
+    END;
+
+    -- --- Load erp_px_cat_g1v2 ---
+    BEGIN
+        start_time := clock_timestamp(); -- Record start time for this table
+        RAISE NOTICE 'Attempting to load bronze.erp_px_cat_g1v2...';
+		RAISE NOTICE '>> Truncating the Table: bronze.erp_px_cat_g1v2';
+        TRUNCATE TABLE bronze.erp_px_cat_g1v2;
+        COPY bronze.erp_px_cat_g1v2
+        FROM 'D:/Data Analysis/Data Warehouse Project/datasets/source_erp/PX_CAT_G1V2.csv'
+        WITH (
+            FORMAT CSV,
+            HEADER true,
+            DELIMITER ','
+        );
+        end_time := clock_timestamp(); -- Record end time for this table
+        duration := end_time - start_time; -- Calculate duration
+        RAISE NOTICE 'Successfully loaded bronze.erp_px_cat_g1v2.';
+        RAISE NOTICE '>> Duration to Load bronze.erp_px_cat_g1v2 Table: %', duration;
+    EXCEPTION
+        WHEN data_exception THEN
+            RAISE WARNING 'Data error loading bronze.erp_px_cat_g1v2: SQLSTATE % - %', SQLSTATE, SQLERRM;
+        WHEN OTHERS THEN
+            RAISE WARNING 'An unexpected error occurred loading bronze.erp_px_cat_g1v2: SQLSTATE % - %', SQLSTATE, SQLERRM;
+    END;
+
+    batch_end_time := clock_timestamp(); -- END CALCULATING THE LOADING TIME OF WHOLE LAYER
+    batch_duration := batch_end_time - batch_start_time; -- CALCULATE Batch Duration
+    RAISE NOTICE '=============================================';
+    RAISE NOTICE 'Bronze Layer Loading Complete.';
+    RAISE NOTICE '>> Duration to Load the Bronze Layer: %', batch_duration; -- Corrected to single quotes and proper calculation
+    RAISE NOTICE '=============================================';
+
+END;
+$$;
+
+CALL bronze.load_bronze_data();
