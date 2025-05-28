@@ -36,4 +36,14 @@ Develop SQL-based analytics to deliver detailed insights into:
 - **Product Performance**
 - **Sales Trends**
 
-These insights empower stakeholders with key business metrics, enabling strategic decision-making.  
+These insights empower stakeholders with key business metrics, enabling strategic decision-making. 
+
+## 🛡️ License
+
+This project is licensed under the [MIT License](LICENSE). You are free to use, modify, and share this project with proper attribution.
+
+## 🌟 About Me
+
+Hi there! I'm **Huzaifa Shahzad**. I’m an aspiring Data Analyst with experties in **SQL**, **Python**, **Git**, **Power BI** and *Tableau**. I have certifications in **SQL Assciate**,  **Associate Data Analyst in SQL**, **Associate Data Analyst in Python**, **Associate Data Engineer** and **Data Literacy Professional**. All these ceritifications can be viewed on:
+[![DataCamp](https://img.shields.io/badge/DataCamp-0077B5?style=for-the-badge&logoColor=white)](https://www.datacamp.com/portfolio/huzaifaShahzad)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/huzaifashahzad)
