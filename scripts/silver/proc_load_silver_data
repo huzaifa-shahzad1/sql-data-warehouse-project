@@ -133,7 +133,11 @@ BEGIN
             sls_ord_num,
             sls_prd_key,
             sls_cust_id,
-            sls_order_dt,
+            -- Handling NULL values in sls_order_dt 
+            CASE sls_order_dt
+				WHEN NULL THEN sls_ship_dt - 7 
+				ELSE sls_order_dt
+			END AS sls_order_dt,
             sls_ship_dt,
             sls_due_dt,
             sls_sales,
