@@ -90,12 +90,25 @@ BEGIN
     END;
 
     -- --- Load crm_sales_details ---
+
+    -- CREATE a temporary table to avoid errors of unvalid dates
+    CREATE TEMPORARY TABLE temp_crm_sales_details_stage (
+        sls_ord_num_raw TEXT,
+        sls_prd_key_raw TEXT,
+        sls_cust_id_raw TEXT,
+        sls_order_dt_raw TEXT,
+        sls_ship_dt_raw TEXT,
+        sls_due_dt_raw TEXT,
+        sls_sales_raw TEXT,
+        sls_quantity_raw TEXT,
+        sls_price_raw TEXT
+    );
     BEGIN
         start_time := clock_timestamp(); -- Record start time for this table
         RAISE NOTICE 'Attempting to load bronze.crm_sales_details...';
 		RAISE NOTICE '>> Truncating the Table: bronze.crm_sales_details';
         TRUNCATE TABLE bronze.crm_sales_details;
-        COPY bronze.crm_sales_details
+        COPY temp_crm_sales_details_stage
         FROM 'D:/Data Analysis/Data Warehouse Project/datasets/source_crm/sales_details.csv'
         WITH (
             FORMAT CSV,
@@ -103,6 +116,35 @@ BEGIN
             DELIMITER ',',
 			NULL AS '0'
         );
+	INSERT INTO bronze.crm_sales_details (
+		sls_ord_num,
+		sls_prd_key,
+		sls_cust_id,
+		sls_order_dt,
+		sls_ship_dt,
+		sls_due_dt,
+		sls_sales,
+		sls_quantity,
+		sls_price
+    	)
+	SELECT
+		sls_ord_num_raw::VARCHAR(50),
+		sls_prd_key_raw::VARCHAR(50),
+		sls_cust_id_raw::INT,
+		CASE
+		WHEN sls_order_dt_raw IN ('0', '5489', '32154') THEN NULL -- Explicitly convert these to NULL
+		WHEN sls_order_dt_raw = '' THEN NULL -- Also treat empty string as NULL
+		ELSE sls_order_dt_raw::DATE -- Attempt to cast other values to DATE
+		END AS sls_order_dt,
+		sls_ship_dt_raw::DATE,
+		sls_due_dt_raw::DATE,
+		sls_sales_raw::INT,
+		sls_quantity_raw::INT,
+		sls_price_raw::INT
+		FROM temp_crm_sales_details_stage
+	;
+
+	DROP TABLE temp_crm_sales_details_stage;
         end_time := clock_timestamp(); -- Record end time for this table
         duration := end_time - start_time; -- Calculate duration
         RAISE NOTICE 'Successfully loaded bronze.crm_sales_details.';
